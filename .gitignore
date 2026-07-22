@@ -2,5 +2,6 @@
 build/
 dist/
 *.tar.zst
-*.tar.zst.part-*
+*.part-*
+*.parts.txt
 *.log

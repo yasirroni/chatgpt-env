@@ -83,6 +83,7 @@ julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst
 Each release also includes a `.sha256` checksum file for verification.
 
 If a bundle exceeds 512 MiB, the build script automatically splits it into 500 MiB parts (`.part-001`, `.part-002`, ...) and publishes a `.parts.txt` manifest with the reconstruction command and per-part checksums.
+The split parts are named `julia-env-<name>-linux-x86_64-julia-1.12.4.part-001` (no intermediate `.tar.zst`) so ChatGPT does not misidentify the file type.
 
 ## Use in ChatGPT
 

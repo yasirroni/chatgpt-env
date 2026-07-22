@@ -183,7 +183,8 @@ cp "$bundle_root/BUNDLE_INFO.toml" "$dist_dir/BUNDLE_INFO.toml"
 cp "$validation_log" "$dist_dir/VALIDATION.txt"
 
 if [ "$archive_size" -ge "$max_bytes" ]; then
-  split_prefix="$dist_dir/$archive_base.part-"
+  part_base=$(basename "$archive_path" .tar.zst)
+  split_prefix="$dist_dir/$part_base.part-"
   split -b "$part_bytes" -d -a 3 "$archive_path" "$split_prefix"
   rm "$archive_path"
 
@@ -191,7 +192,7 @@ if [ "$archive_size" -ge "$max_bytes" ]; then
     echo "archive=$archive_base"
     echo "archive_size_bytes=$archive_size"
     echo "archive_sha256=$archive_sha"
-    echo "reconstruct_command=cat $archive_base.part-* > $archive_base"
+    echo "reconstruct_command=cat $part_base.part-* > $archive_base"
     echo
     echo "parts:"
     for part in "$split_prefix"*; do
@@ -200,7 +201,7 @@ if [ "$archive_size" -ge "$max_bytes" ]; then
       part_sha=$(sha256sum "$part" | awk '{print $1}')
       echo "$part_name $part_size $part_sha"
     done
-  } > "$dist_dir/$archive_base.parts.txt"
+  } > "$dist_dir/$part_base.parts.txt"
 fi
 
 cat > "$dist_dir/RELEASE_NOTES.md" <<EOF_NOTES
