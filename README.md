@@ -118,7 +118,7 @@ julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst
 julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst.sha256
 ```
 
-Verify checksums locally before uploading:
+To verify checksums locally before uploading:
 
 ```sh
 sha256sum -c *.sha256
@@ -177,7 +177,7 @@ Use these sources:
 
 Materialise all required runtime and environment archives and checksum files under `/mnt/data/chatgpt-env-inputs`.
 
-Verify the SHA-256 checksum of every archive before extraction.
+If SHA-256 checksum is provided, verify the checksum of every archive before extraction.
 If an archive is split into `.part-*` files, follow the `.parts.txt` manifest to reconstruct the complete `.tar.zst` first.
 
 Extract the runtime and environment under `/mnt/data/chatgpt-env-extracted`.
@@ -185,12 +185,9 @@ Identify the exact extracted runtime and environment paths instead of assuming t
 
 Use the bundled Julia executable, not a system Julia installation.
 Set `JULIA_DEPOT_PATH` to the extracted environment depot and set `JULIA_PKG_OFFLINE=true`.
-Do not run `Pkg.instantiate()` or `Pkg.precompile()` unless package loading fails.
 
-Run the bundled `test_runtime.jl` script.
-Then run a small Julia command with `--project` pointing to the extracted environment to confirm the Julia version, active project, and package status.
+If no project files or scripts provided, run a small Julia command with `--project` pointing to the extracted environment to confirm the Julia version, active project, and package status. If project files or scripts is provided, read and run the julia scripts.
 
-[EDIT: run `/mnt/data/path/to/script.jl` with the extracted environment, or delete this paragraph if no project script should be run.]
 
 Report:
 
