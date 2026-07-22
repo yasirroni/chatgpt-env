@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ENVIRONMENTS = ROOT / "environments"
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED_JULIA = "1.12.4"
+ALLOWED_EXTRA_WORKFLOWS = {"runtime"}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -72,7 +73,9 @@ for workflow in workflow_files:
         workflow_environments.add(match.group(1))
 
 missing_workflows = sorted(set(environment_names) - workflow_environments)
-extra_workflows = sorted(workflow_environments - set(environment_names))
+extra_workflows = sorted(
+    (workflow_environments - set(environment_names)) - ALLOWED_EXTRA_WORKFLOWS
+)
 if missing_workflows:
     errors.append("Missing environment workflows: " + ", ".join(missing_workflows))
 if extra_workflows:
