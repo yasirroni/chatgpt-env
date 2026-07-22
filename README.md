@@ -36,6 +36,29 @@ No workflow runs on push, pull request, or a schedule.
 Each environment workflow calls `scripts/build_environment.sh`.
 The runtime workflow calls `scripts/build_runtime_bundle.sh`.
 
+### Example: get a working docs-and-eda bundle
+
+To use the `docs-and-eda` environment in ChatGPT, you need **two** bundles:
+the Julia runtime (once per Julia version) and the environment itself.
+
+1. Go to [Build Julia runtime bundle](https://github.com/yasirroni/chatgpt-env/actions/workflows/build-runtime.yml)
+   and click **Run workflow**.
+   This produces `julia-runtime-linux-x86_64-1.12.4.tar.zst`.
+   You only need to do this once — the same runtime works with every environment.
+
+2. Go to [Build docs and eda environment](https://github.com/yasirroni/chatgpt-env/actions/workflows/build-docs-and-eda.yml)
+   and click **Run workflow**.
+   This produces `julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst`.
+
+3. Wait for both workflows to finish, then download the assets from their
+   respective Releases pages.
+
+You now have the engine (runtime) and the fuel (environment).
+Upload both to ChatGPT as described under [Use in ChatGPT](#use-in-chatgpt).
+
+The same pattern applies to any other environment: run the runtime workflow
+once, then run the environment workflow for the env you need.
+
 ## Build process
 
 A workflow:
