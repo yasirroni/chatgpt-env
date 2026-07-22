@@ -94,6 +94,16 @@ The release includes a `.parts.txt` file containing the reconstruction command, 
 Each workflow publishes a GitHub Release with the bundle archive and metadata.
 Tag format: `julia-1.12.4-<env>-run-<run_number>-<attempt>`.
 
+Example release (docs-and-eda):
+
+- Release page: [julia-1.12.4-docs-and-eda](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-docs-and-eda-run-1-1)
+- Direct download: [julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-docs-and-eda-run-1-1/julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst)
+
+The runtime release follows the same pattern:
+
+- Release page: [julia-1.12.4-runtime](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-runtime-run-2-1)
+- Direct download: [julia-runtime-linux-x86_64-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-runtime-run-2-1/julia-runtime-linux-x86_64-1.12.4.tar.zst)
+
 1. Open your repository on **github.com**.
 2. Go to the **Releases** page.
 3. Find the release for the runtime and the environment you need.
