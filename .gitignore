@@ -1,0 +1,6 @@
+.DS_Store
+build/
+dist/
+*.tar.zst
+*.tar.zst.part-*
+*.log
