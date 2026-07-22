@@ -215,3 +215,14 @@ scripts/build_environment.sh docs-and-eda
 ```
 
 On an Apple Silicon Mac, use the GitHub Actions workflows rather than producing a ChatGPT bundle locally.
+
+## Contributing
+
+### Shell scripts
+
+Executable shell scripts must be committed with Git mode `100755`.
+
+```sh
+git update-index --chmod=+x path/to/script.sh
+git ls-files --stage path/to/script.sh
+````
