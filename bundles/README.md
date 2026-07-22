@@ -15,6 +15,5 @@ julia-env-<environment>/
 └── VALIDATION.txt
 ```
 
-Archives below 512 MiB are published as one `.tar.zst` file. Larger archives
-are split into parts below the ChatGPT per-file limit, with reconstruction and
-checksum metadata published beside them.
+All archives are published as single `.tar.zst` files with a matching `.sha256`
+checksum file.
