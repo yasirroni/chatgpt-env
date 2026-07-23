@@ -98,30 +98,23 @@ Each workflow publishes a GitHub Release with the bundle archive and metadata.
 
 The release tag follows the format `julia-1.12.4-<env>-run-<run_number>-<attempt>`.
 
-Example release (docs-and-eda):
-
-- Release page: [julia-1.12.4-docs-and-eda](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-docs-and-eda-run-1-1)
-- Direct download: [julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-docs-and-eda-run-1-1/julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst)
-
-The runtime release follows the same pattern:
+Example release:
 
 - Release page: [julia-1.12.4-runtime](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-runtime-run-2-1)
 - Direct download: [julia-runtime-linux-x86_64-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-runtime-run-2-1/julia-runtime-linux-x86_64-1.12.4.tar.zst)
+
+- Release page: [julia-1.12.4-docs-and-eda](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-docs-and-eda-run-2-1)
+- Direct download: [julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-docs-and-eda-run-2-1/julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst)
+
+- Release page: [julia-1.12.4-optimisation-and-solver-oss environment](https://github.com/yasirroni/chatgpt-env/releases/tag/julia-1.12.4-optimisation-and-solver-oss-run-1-1)
+- Direct download: [julia-env-optimisation-and-solver-oss-linux-x86_64-julia-1.12.4.tar.zst](https://github.com/yasirroni/chatgpt-env/releases/download/julia-1.12.4-optimisation-and-solver-oss-run-1-1/julia-env-optimisation-and-solver-oss-linux-x86_64-julia-1.12.4.tar.zst)
 
 Download the **runtime bundle** once per Julia version, plus one **environment bundle** per project.
 Example downloaded files:
 
 ```text
 julia-runtime-linux-x86_64-1.12.4.tar.zst
-julia-runtime-linux-x86_64-1.12.4.tar.zst.sha256
 julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst
-julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst.sha256
-```
-
-To verify checksums locally before uploading:
-
-```sh
-sha256sum -c *.sha256
 ```
 
 ### Store the bundles in ChatGPT Library
