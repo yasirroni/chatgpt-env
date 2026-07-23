@@ -164,32 +164,51 @@ Type `@` and select the corresponding Library file, folder, or Project source wh
 ```text
 Use these sources:
 
-- Julia runtime: [EDIT: type @ and select the runtime archive, checksum file, or containing folder]
-- Julia environment: [EDIT: type @ and select the environment archive, checksum file, or containing folder]
-- Project files or script: [EDIT: type @ and select the project folder or file, or write "none"]
+* Julia runtime: [EDIT: type `@` and select the runtime archive, checksum file, or containing folder]
+* Julia environment: [EDIT: type `@` and select the environment archive, checksum file, or containing folder]
+* Additional tools: [EDIT: select archives such as Quarto, or write `none`]
+* Project files or scripts: [EDIT: select the project folder or file, or write `none`]
 
-Materialise all required runtime and environment archives and checksum files under `/mnt/data/chatgpt-env-inputs`.
+Materialise the required archives, checksum files, manifests, and archive parts under:
 
-If SHA-256 checksum is provided, verify the checksum of every archive before extraction.
-If an archive is split into `.part-*` files, follow the `.parts.txt` manifest to reconstruct the complete `.tar.zst` first.
+   /mnt/data/chatgpt-env-inputs
 
-Extract the runtime and environment under `/mnt/data/chatgpt-env-extracted`.
-Identify the exact extracted runtime and environment paths instead of assuming their directory names.
+If a supplied SHA-256 checksum exists, verify the corresponding archive before extraction. If an archive is split into `.part-*` files, reconstruct it according to its `.parts.txt` manifest before verification and extraction.
 
-Use the bundled Julia executable, not a system Julia installation.
-Set `JULIA_DEPOT_PATH` to the extracted environment depot and set `JULIA_PKG_OFFLINE=true`.
+Extract the runtime, environment, and additional tools under:
 
-If no project files or scripts provided, run a small Julia command with `--project` pointing to the extracted environment to confirm the Julia version, active project, and package status. If project files or scripts is provided, read and run the julia scripts.
+   /mnt/data/chatgpt-env-extracted
 
+Discover the exact extracted paths instead of assuming directory names.
 
-Report:
+Use the bundled executables, not system installations. Set:
 
-1. the materialised files;
-2. checksum and (if applicable) reconstruction results;
-3. extracted runtime and environment paths;
-4. the Julia version and active project;
-5. the validation command and result; and
-6. any package-loading failure or fallback action.
+   JULIA_DEPOT_PATH=<extracted-environment-depot>
+   JULIA_PKG_OFFLINE=true
+
+When project files are provided:
+
+1. inspect the project and identify its documented tests, scripts, and build commands;
+2. run the relevant commands using the bundled runtime and tools;
+3. if a Julia project has `Project.toml` but no usable `Manifest.toml`, treat this as normal package setup and run:
+
+   using Pkg
+   Pkg.instantiate(; allow_autoprecomp=false)
+
+   using the extracted offline depot, then continue;
+4. do not report a missing `Manifest.toml`, dependency instantiation, or ordinary cache creation as a failure;
+5. report a package-loading failure only when loading still fails after normal instantiation.
+
+When no project files or scripts are provided, run a small Julia command with `--project` pointing to the extracted environment and report the Julia version, active project, and package status.
+
+Lead with the final status. Do not describe transient setup steps or recovered initial attempts as failed builds when the final command succeeds.
+
+Report concisely:
+
+1. materialised files (and checksum if provided);
+2. resulted environment (and sub folder environments if exists);
+3. fallback actions, failures, or warnings if any;
+4. resulted execution of Project files or scripts if provided.
 ```
 
 The prompt deliberately asks ChatGPT to discover the materialised and extracted paths.
