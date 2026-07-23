@@ -179,6 +179,8 @@ max_bytes=${CHATGPT_MAX_BYTES:-536870912}
 part_bytes=${CHATGPT_PART_BYTES:-524288000}
 
 printf '%s  %s\n' "$archive_sha" "$archive_base" > "$dist_dir/$archive_base.sha256"
+cp "$source_environment/Project.toml" "$dist_dir/Project.toml"
+cp "$source_environment/Manifest.toml" "$dist_dir/Manifest.toml"
 cp "$bundle_root/BUNDLE_INFO.toml" "$dist_dir/BUNDLE_INFO.toml"
 cp "$validation_log" "$dist_dir/VALIDATION.txt"
 

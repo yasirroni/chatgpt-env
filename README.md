@@ -8,7 +8,7 @@ The repository keeps a small number of workflow-oriented environments rather tha
 
 | Environment | Purpose |
 |---|---|
-| `docs-and-eda` | Data wrangling, EDA, plotting, and documentation (CSV, DataFrames, Arrow, Plots, PlotlyJS, Literate, Documenter) |
+| `docs-and-eda` | Data wrangling, EDA, plotting, documentation, and Quarto notebook rendering (CSV, DataFrames, Arrow, Plots, PlotlyJS, Literate, Documenter, JSON3, QuartoNotebookRunner) |
 | `optimisation-and-solver-oss` | Optimisation with open-source solvers only — HiGHS, Ipopt, SCS (JuMP, OrdinaryDiffEq) |
 | `optimisation-and-solver-gurobi` | Optimisation with any solver — Gurobi, HiGHS, Ipopt, SCS (JuMP, OrdinaryDiffEq) |
 | `power-systems` | Power-systems simulation and analysis (PowerSystems, PowerSimulations, PowerModels, PowerAnalytics, PRAS, Gurobi, HiGHS) |
