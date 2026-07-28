@@ -1,8 +1,9 @@
 # chatgpt-env
 
-`chatgpt-env` builds reproducible Julia package-environment bundles for Linux x86-64 ChatGPT sandboxes.
-Each environment is built from a committed `Project.toml` and `Manifest.toml` using Julia 1.12.4 on a GitHub-hosted Linux runner.
-The repository keeps a small number of workflow-oriented environments rather than creating one environment for every downstream project.
+`chatgpt-env` builds reusable bundles for Linux x86-64 ChatGPT sandboxes.
+Most bundles provide Julia package environments built from committed `Project.toml` and `Manifest.toml` files using Julia 1.12.4 on a GitHub-hosted Linux runner.
+The standalone `semantic-search` bundle provides Python wheels and a pinned embedding model for local semantic search without adding a Julia environment directory.
+The repository keeps a small number of workflow-oriented bundles rather than creating one bundle for every downstream project.
 
 ## Environments
 
@@ -14,8 +15,13 @@ The repository keeps a small number of workflow-oriented environments rather tha
 | `power-systems` | Power-systems simulation and analysis (PowerSystems, PowerSimulations, PowerModels, PowerAnalytics, PRAS, Gurobi, HiGHS) |
 | `power-systems-dynamics` | Power-systems stack plus dynamic simulation (adds PowerSimulationsDynamics, OrdinaryDiffEq, Sundials) |
 | `matlab` | MATLAB interoperability with the optimisation and power-systems stack (MATLAB, JuMP, PowerModels, Gurobi, HiGHS) |
+| `semantic-search` | Local embedding generation and SQLite vector search (Sentence Transformers, sqlite-vec, all-MiniLM-L6-v2) |
 
 A separate **runtime** workflow (no environment directory) produces a portable Julia 1.12.4 binary archive (`julia-runtime-linux-x86_64-1.12.4.tar.zst`).
+
+The separate **semantic-search** workflow also has no environment directory.
+It produces `semantic-search-linux-x86_64-py313.zip` with five Python wheels, the pinned `sentence-transformers/all-MiniLM-L6-v2` model, metadata, validation output, and SHA-256 checksums.
+The bundle relies on the Python 3.13 and scientific Python packages already available in the target ChatGPT sandbox.
 
 The TOML files under `environments/` are the authoritative dependency inputs.
 Generated depots and compressed bundles are release assets, not repository source files.
@@ -30,11 +36,13 @@ No workflow runs on push, pull request, or a schedule.
 3. Select the workflow:
    - **Build Julia runtime bundle** — run once per Julia version
    - Any environment workflow — run once per environment
+   - **Build semantic search bundle** — run when local embedding generation and SQLite vector search are required
 4. Select **Run workflow**.
 5. Download the resulting assets from the release created by the workflow.
 
 Each environment workflow calls `scripts/build_environment.sh`.
 The runtime workflow calls `scripts/build_runtime_bundle.sh`.
+The semantic-search workflow downloads and validates its wheels and pinned model directly because it is not a Julia package environment.
 
 ### Example: get a working docs-and-eda bundle
 
@@ -54,6 +62,15 @@ Upload both to ChatGPT as described under [Use in ChatGPT](#use-in-chatgpt).
 
 The same pattern applies to any other environment: run the runtime workflow once, then run the environment workflow for the environment you need.
 
+### Example: get a semantic-search bundle
+
+1. Go to [Build semantic search bundle](https://github.com/yasirroni/chatgpt-env/actions/workflows/build-semantic-search.yml) and select **Run workflow**.
+2. Wait for the workflow to finish, then open the GitHub Release created by the run.
+3. Download `semantic-search-linux-x86_64-py313.zip` and its `.sha256` file.
+4. Upload both files to ChatGPT.
+
+The archive runs independently of the Julia runtime bundle.
+
 ## Build process
 
 A workflow:
@@ -71,16 +88,22 @@ Compiled caches use `JULIA_CPU_TARGET=generic` so they are not tied to a particu
 
 The **runtime** workflow follows a simpler process: it downloads the official Julia tarball from `julialang.org`, verifies the SHA-256 checksum, adds a `test_runtime.jl` script, creates a `.tar.zst` archive, and publishes the release.
 
+The **semantic-search** workflow downloads five Linux-compatible Python wheels and the pinned `all-MiniLM-L6-v2` model, validates the expected files and model size, writes per-file checksums, packages the result as a ZIP archive, and publishes the release.
+
 ## Bundle size
 
-All current bundles fit under 512 MiB and are published as single `.tar.zst` files:
+All current bundles fit under 512 MiB and are published as single archives:
 
 ```text
 julia-runtime-linux-x86_64-1.12.4.tar.zst
 julia-env-docs-and-eda-linux-x86_64-julia-1.12.4.tar.zst
+semantic-search-linux-x86_64-py313.zip
 ```
 
 Each release also includes a `.sha256` checksum file for verification.
+
+The 512 MiB split-archive rule applies to Julia `.tar.zst` bundles.
+The semantic-search ZIP is expected to remain below that threshold and is published as one file.
 
 If a bundle exceeds 512 MiB, the build script automatically splits it into 500 MiB parts (`.part-001`, `.part-002`, ...) and publishes a `.parts.txt` manifest with the reconstruction command and per-part checksums.
 The split parts are named `julia-env-<name>-linux-x86_64-julia-1.12.4.part-001` (no intermediate `.tar.zst`) so ChatGPT does not misidentify the file type.
@@ -130,6 +153,8 @@ Library is available from the sidebar on ChatGPT web.
 Files uploaded in a Temporary Chat are not saved to Library.
 For current Library behaviour and limits, see [File storage and Library in ChatGPT](https://help.openai.com/en/articles/20001052-file-storage-and-library-in-chatgpt).
 
+For the `semantic-search` archive, it can be used without Julia.
+
 ### Add the bundles to a ChatGPT Project
 
 A file stored in Library is not automatically a source for every ChatGPT Project.
@@ -156,7 +181,7 @@ For a Project workflow, `@` is a reference shortcut; it does not replace adding 
 
 ### Start the ChatGPT task
 
-After attaching the files to the current chat or adding them to the Project sources, paste the prompt below.
+After attaching the files to chat or adding them to the Project sources, paste the example prompt below for a Julia environment.
 
 Before sending it, replace each `[EDIT: ...]` field.
 Type `@` and select the corresponding Library file, folder, or Project source when the picker is available.
@@ -213,6 +238,14 @@ Report concisely:
 
 The prompt deliberately asks ChatGPT to discover the materialised and extracted paths.
 Files referenced from Library or Project sources are not guaranteed to appear under their display names in `/mnt/data`.
+
+For `semanctic-search` you can use this short prompts:
+
+```text
+1. install the wheels from `semantic-search/wheels/` without accessing a package index;
+2. load the model from `semantic-search/models/sentence-transformers/all-MiniLM-L6-v2/`; and
+3. validate `sqlite_vec`, `sentence_transformers`, and a 384-dimensional test embedding.
+```
 
 ### Extract and use
 

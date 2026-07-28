@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ENVIRONMENTS = ROOT / "environments"
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED_JULIA = "1.12.4"
-ALLOWED_EXTRA_WORKFLOWS = {"runtime"}
+ALLOWED_EXTRA_WORKFLOWS = {"runtime", "semantic-search"}
 
 errors: list[str] = []
 warnings: list[str] = []

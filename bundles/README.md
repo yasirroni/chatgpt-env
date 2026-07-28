@@ -1,9 +1,9 @@
 # Bundle outputs
 
-Generated Julia environment archives are published as GitHub Release assets.
+Generated bundles are published as GitHub Release assets.
 They are not committed to the repository.
 
-A bundle contains:
+A Julia environment bundle contains:
 
 ```text
 julia-env-<environment>/
@@ -15,5 +15,19 @@ julia-env-<environment>/
 └── VALIDATION.txt
 ```
 
-All archives are published as single `.tar.zst` files with a matching `.sha256`
-checksum file.
+The standalone semantic-search bundle contains:
+
+```text
+semantic-search/
+├── wheels/
+├── models/
+│   └── sentence-transformers/
+│       └── all-MiniLM-L6-v2/
+├── BUNDLE_INFO.toml
+├── VALIDATION.txt
+└── SHA256SUMS
+```
+
+Julia bundles are published as `.tar.zst` files.
+The semantic-search bundle is published as `semantic-search-linux-x86_64-py313.zip`.
+Every archive has a matching `.sha256` checksum file.
