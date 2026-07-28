@@ -1,4 +1,4 @@
-name: Build semantic search bundle
+name: Build semantic search environment
 run-name: Build semantic-search for Python 3.13 by @${{ github.actor }}
 
 on:
@@ -17,205 +17,22 @@ jobs:
     timeout-minutes: 30
     env:
       ENVIRONMENT_NAME: semantic-search
-      PYTHON_VERSION: "3.13"
-      MODEL_REPOSITORY: sentence-transformers/all-MiniLM-L6-v2
-      MODEL_REVISION: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v8
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          version: "0.10.0"
+          python-version: "3.13"
+          working-directory: environments/semantic-search
 
-      - name: Install download tooling
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install "huggingface-hub==1.24.0"
-
-      - name: Download wheels and model
-        env:
-          HF_HUB_DISABLE_TELEMETRY: "1"
-        run: |
-          set -euo pipefail
-
-          bundle_root="build/semantic-search"
-          wheel_dir="$bundle_root/wheels"
-          model_dir="$bundle_root/models/sentence-transformers/all-MiniLM-L6-v2"
-
-          mkdir -p "$wheel_dir" "$model_dir"
-
-          python -m pip download \
-            --dest "$wheel_dir" \
-            --only-binary=:all: \
-            --no-deps \
-            "safetensors==0.8.0" \
-            "sentence-transformers==5.6.0" \
-            "sqlite-vec==0.1.9" \
-            "tokenizers==0.22.2" \
-            "transformers==5.14.1"
-
-          python - <<'PY'
-          import os
-          from huggingface_hub import snapshot_download
-
-          snapshot_download(
-              repo_id=os.environ["MODEL_REPOSITORY"],
-              revision=os.environ["MODEL_REVISION"],
-              local_dir="build/semantic-search/models/sentence-transformers/all-MiniLM-L6-v2",
-              allow_patterns=[
-                  "1_Pooling/*",
-                  "config.json",
-                  "config_sentence_transformers.json",
-                  "data_config.json",
-                  "model.safetensors",
-                  "modules.json",
-                  "sentence_bert_config.json",
-                  "special_tokens_map.json",
-                  "tokenizer.json",
-                  "tokenizer_config.json",
-                  "vocab.txt",
-              ],
-          )
-          PY
-
-          rm -rf "$model_dir/.cache"
-
-      - name: Validate bundle contents
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          root = Path("build/semantic-search")
-          wheels = sorted((root / "wheels").glob("*.whl"))
-          expected_prefixes = {
-              "safetensors-0.8.0-",
-              "sentence_transformers-5.6.0-",
-              "sqlite_vec-0.1.9-",
-              "tokenizers-0.22.2-",
-              "transformers-5.14.1-",
-          }
-
-          if len(wheels) != len(expected_prefixes):
-              raise SystemExit(
-                  f"Expected {len(expected_prefixes)} wheels, found {len(wheels)}"
-              )
-
-          names = [path.name for path in wheels]
-          missing_wheels = [
-              prefix
-              for prefix in sorted(expected_prefixes)
-              if not any(name.startswith(prefix) for name in names)
-          ]
-          if missing_wheels:
-              raise SystemExit(f"Missing wheels: {missing_wheels}")
-
-          model = root / "models/sentence-transformers/all-MiniLM-L6-v2"
-          required_model_files = [
-              "1_Pooling/config.json",
-              "config.json",
-              "config_sentence_transformers.json",
-              "model.safetensors",
-              "modules.json",
-              "sentence_bert_config.json",
-              "special_tokens_map.json",
-              "tokenizer.json",
-              "tokenizer_config.json",
-              "vocab.txt",
-          ]
-          missing_model_files = [
-              name for name in required_model_files if not (model / name).is_file()
-          ]
-          if missing_model_files:
-              raise SystemExit(f"Missing model files: {missing_model_files}")
-
-          if (model / "model.safetensors").stat().st_size < 80_000_000:
-              raise SystemExit("model.safetensors is unexpectedly small")
-
-          print("Semantic-search bundle validation passed")
-          for wheel in wheels:
-              print(f"  {wheel.name}: {wheel.stat().st_size} bytes")
-          PY
-
-      - name: Write metadata and package bundle
-        run: |
-          set -euo pipefail
-
-          bundle_root="build/semantic-search"
-          dist_dir="dist/semantic-search"
-          archive_name="semantic-search-linux-x86_64-py313.zip"
-
-          mkdir -p "$dist_dir"
-
-          cat > "$bundle_root/BUNDLE_INFO.toml" <<EOF
-          bundle = "semantic-search"
-          target_os = "linux"
-          target_arch = "x86_64"
-          python_version = "3.13"
-          model_repository = "$MODEL_REPOSITORY"
-          model_revision = "$MODEL_REVISION"
-          embedding_dimensions = 384
-
-          [packages]
-          safetensors = "0.8.0"
-          sentence_transformers = "5.6.0"
-          sqlite_vec = "0.1.9"
-          tokenizers = "0.22.2"
-          transformers = "5.14.1"
-          EOF
-
-          cat > "$bundle_root/VALIDATION.txt" <<EOF
-          Semantic-search bundle validated on GitHub Actions.
-          Target: Linux x86-64, CPython 3.13
-          Model: $MODEL_REPOSITORY@$MODEL_REVISION
-          Expected embedding dimensions: 384
-          EOF
-
-          (
-            cd "$bundle_root"
-            find . -type f ! -name SHA256SUMS -print0 \
-              | sort -z \
-              | xargs -0 sha256sum > SHA256SUMS
-          )
-
-          (
-            cd build
-            zip -q -r "../$dist_dir/$archive_name" semantic-search
-          )
-
-          unzip -t "$dist_dir/$archive_name"
-          archive_sha=$(sha256sum "$dist_dir/$archive_name" | awk '{print $1}')
-          printf '%s  %s\n' "$archive_sha" "$archive_name" \
-            > "$dist_dir/$archive_name.sha256"
-
-          cat > "$dist_dir/RELEASE_NOTES.md" <<EOF
-          Standalone semantic-search bundle for Linux x86-64 ChatGPT sandboxes.
-
-          It contains five Python wheels, the pinned all-MiniLM-L6-v2 model,
-          bundle metadata, validation output, and per-file SHA-256 checksums.
-
-          Python itself is not included; the target ChatGPT sandbox provides
-          CPython 3.13 and the remaining scientific Python dependencies.
-          EOF
+      - name: Build and validate bundle
+        run: scripts/build_environment.sh "$ENVIRONMENT_NAME"
 
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          dist_dir="dist/semantic-search"
-          tag="semantic-search-py313-run-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
-
-          mapfile -d '' assets < <(
-            find "$dist_dir" -maxdepth 1 -type f \
-              ! -name RELEASE_NOTES.md \
-              -print0 | sort -z
-          )
-
-          gh release create "$tag" "${assets[@]}" \
-            --target "$GITHUB_SHA" \
-            --title "Semantic search bundle for Python 3.13" \
-            --notes-file "$dist_dir/RELEASE_NOTES.md"
+        run: scripts/publish_release.sh "$ENVIRONMENT_NAME"

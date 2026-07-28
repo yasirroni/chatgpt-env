@@ -1,8 +1,8 @@
 # chatgpt-env
 
 `chatgpt-env` builds reusable bundles for Linux x86-64 ChatGPT sandboxes.
-Most bundles provide Julia package environments built from committed `Project.toml` and `Manifest.toml` files using Julia 1.12.4 on a GitHub-hosted Linux runner.
-The standalone `semantic-search` bundle provides Python wheels and a pinned embedding model for local semantic search without adding a Julia environment directory.
+Julia environments are built from committed `Project.toml` and `Manifest.toml` files using Julia 1.12.4 on a GitHub-hosted Linux runner.
+The `semantic-search` Python environment is built from a committed `pyproject.toml`, `uv.lock`, and `model.toml`.
 The repository keeps a small number of workflow-oriented bundles rather than creating one bundle for every downstream project.
 
 ## Environments
@@ -19,11 +19,19 @@ The repository keeps a small number of workflow-oriented bundles rather than cre
 
 A separate **runtime** workflow (no environment directory) produces a portable Julia 1.12.4 binary archive (`julia-runtime-linux-x86_64-1.12.4.tar.zst`).
 
-The separate **semantic-search** workflow also has no environment directory.
-It produces `semantic-search-linux-x86_64-py313.zip` with five Python wheels, the pinned `sentence-transformers/all-MiniLM-L6-v2` model, metadata, validation output, and SHA-256 checksums.
+The **semantic-search** inputs live under `environments/semantic-search/`.
+Its workflow produces `semantic-search-linux-x86_64-py313.zip` with five locked Python wheels, the pinned `sentence-transformers/all-MiniLM-L6-v2` model, metadata, validation output, and SHA-256 checksums.
 The bundle relies on the Python 3.13 and scientific Python packages already available in the target ChatGPT sandbox.
 
-The TOML files under `environments/` are the authoritative dependency inputs.
+```text
+environments/semantic-search/
+├── pyproject.toml  # direct package pins and ChatGPT-supplied dependencies
+├── uv.lock         # exact wheel URLs, versions, sizes, and SHA-256 hashes
+└── model.toml      # model revision, destination, file set, and constraints
+```
+
+The files under `environments/` are the authoritative dependency inputs.
+Julia environments use `Project.toml` and `Manifest.toml`; Python environments use `pyproject.toml`, `uv.lock`, and model configuration where required.
 Generated depots and compressed bundles are release assets, not repository source files.
 
 ## Build a bundle
@@ -40,9 +48,9 @@ No workflow runs on push, pull request, or a schedule.
 4. Select **Run workflow**.
 5. Download the resulting assets from the release created by the workflow.
 
-Each environment workflow calls `scripts/build_environment.sh`.
+Each environment workflow calls `scripts/build_environment.sh` and `scripts/publish_release.sh`.
 The runtime workflow calls `scripts/build_runtime_bundle.sh`.
-The semantic-search workflow downloads and validates its wheels and pinned model directly because it is not a Julia package environment.
+`scripts/build_environment.sh` dispatches to the Julia or Python builder from the files present in the selected environment directory.
 
 ### Example: get a working docs-and-eda bundle
 
@@ -73,7 +81,7 @@ The archive runs independently of the Julia runtime bundle.
 
 ## Build process
 
-A workflow:
+A Julia environment workflow:
 
 1. installs Julia 1.12.4 on Ubuntu x86-64;
 2. creates a clean environment-specific Julia depot;
@@ -88,7 +96,7 @@ Compiled caches use `JULIA_CPU_TARGET=generic` so they are not tied to a particu
 
 The **runtime** workflow follows a simpler process: it downloads the official Julia tarball from `julialang.org`, verifies the SHA-256 checksum, adds a `test_runtime.jl` script, creates a `.tar.zst` archive, and publishes the release.
 
-The **semantic-search** workflow downloads five Linux-compatible Python wheels and the pinned `all-MiniLM-L6-v2` model, validates the expected files and model size, writes per-file checksums, packages the result as a ZIP archive, and publishes the release.
+The **semantic-search** workflow exports the committed `uv.lock`, downloads the five locked Linux-compatible wheels, downloads the model files declared in `model.toml`, verifies the locked wheel hashes and model constraints, writes per-file checksums, packages the result as a ZIP archive, and publishes the release.
 
 ## Bundle size
 
@@ -119,7 +127,8 @@ Each workflow publishes a GitHub Release with the bundle archive and metadata.
 3. Find the release for the runtime and the environment you need.
 4. Download the `.tar.zst` asset(s) to your local machine.
 
-The release tag follows the format `julia-1.12.4-<env>-run-<run_number>-<attempt>`.
+Julia release tags follow `julia-1.12.4-<env>-run-<run_number>-<attempt>`.
+The semantic-search release tag follows `semantic-search-py313-run-<run_number>-<attempt>`.
 
 Example release:
 
@@ -181,7 +190,7 @@ For a Project workflow, `@` is a reference shortcut; it does not replace adding 
 
 ### Start the ChatGPT task
 
-After attaching the files to chat or adding them to the Project sources, paste the example prompt below for a Julia environment.
+After attaching the files to the chat or adding them to the Project sources, paste the prompt below.
 
 Before sending it, replace each `[EDIT: ...]` field.
 Type `@` and select the corresponding Library file, folder, or Project source when the picker is available.
@@ -332,11 +341,13 @@ Running licensed Gurobi optimisation still requires a valid Gurobi licence.
 
 ## Local validation
 
-Repository structure, TOML consistency, workflow coverage, and manual-only triggers can be checked without Julia:
+Repository structure, TOML consistency, uv-lock consistency, workflow coverage, and manual-only triggers can be checked without Julia:
 
 ```sh
 make validate
 ```
+
+This check requires Python 3 and `uv` because Python environment locks are exported in frozen mode during validation.
 
 Building an environment locally is intentionally restricted to Linux x86-64:
 

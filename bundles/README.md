@@ -15,7 +15,7 @@ julia-env-<environment>/
 └── VALIDATION.txt
 ```
 
-The standalone semantic-search bundle contains:
+The semantic-search Python environment bundle contains:
 
 ```text
 semantic-search/

@@ -13,6 +13,14 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repo_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 source_environment="$repo_root/environments/$environment_name"
 
+if [ -f "$source_environment/pyproject.toml" ] && [ -f "$source_environment/uv.lock" ]; then
+  command -v python3 >/dev/null 2>&1 || {
+    echo "Python 3 is not available on PATH" >&2
+    exit 2
+  }
+  exec python3 "$script_dir/build_python_environment.py" "$environment_name"
+fi
+
 [ -f "$source_environment/Project.toml" ] || {
   echo "Unknown environment: $environment_name" >&2
   exit 2
