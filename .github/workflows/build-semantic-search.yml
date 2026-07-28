@@ -22,12 +22,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up uv and Python
-        uses: astral-sh/setup-uv@v8
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          version: "0.10.0"
-          python-version: "3.13"
-          working-directory: environments/semantic-search
+          version: "0.11.32"
+
+      - name: Install Python 3.13
+        run: uv python install 3.13
 
       - name: Build and validate bundle
         run: scripts/build_environment.sh "$ENVIRONMENT_NAME"
