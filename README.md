@@ -369,6 +369,29 @@ git update-index --chmod=+x path/to/script.sh
 git ls-files --stage path/to/script.sh
 ```
 
+For example:
+
+```sh
+git update-index --chmod=+x scripts/build_environment.sh
+git ls-files --stage scripts/build_environment.sh
+```
+
+Alternatively:
+
+```sh
+chmod +x scripts/build_environment.sh
+chmod +x scripts/build_runtime_bundle.sh
+chmod +x scripts/publish_release.sh
+
+git add scripts/
+```
+
+To check all tracked shell scripts:
+
+```sh
+git ls-files --stage '*.sh'
+```
+
 ### Creating `Manifest.toml`
 
 This example use `--project=./environments/pisp`.
