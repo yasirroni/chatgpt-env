@@ -33,9 +33,21 @@ A repository example that is zipped and passed directly to chat is:
 /mnt/data/pisp-260728-v5.zip
 ```
 
-The prompt will always be accompanied by the latest PISP.jl repository ZIP and may also include one task card.
+The prompt will always point to or provide the latest PISP.jl repository ZIP.
+
+If the prompt include a task card, that is the main task.
+If not, task card need to be made from the template kanban-card.md.
 
 Do not use Quarto for PISP.jl works.
+
+Tho most minimal expected output:
+
+```text
+/mnt/data/work.zip
+```
+
+The first thing to be reported and provided before anything else in the final answer is the zipped `work/` dir.
+This minimal output of deliverable excludes gitignored files inside `data/`.
 
 </context>
 
@@ -632,7 +644,8 @@ A file’s presence under `work/` does not automatically authorise packaging it.
 
 <deliverables>
 
-No matter what, Deliverable must be provided, as zipped package, even when the `work/` is not yet finished or facing a blocker.
+No matter what, Deliverable must be provided, as zipped package of the `work/` dir.
+This rule apply even when the `work/` is not yet finished or facing a blocker.
 
 ## Deliverable 1 — latest clean worktree
 
