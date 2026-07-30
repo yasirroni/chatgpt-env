@@ -5,3 +5,5 @@ dist/
 *.part-*
 *.parts.txt
 *.log
+.tmp/
+__pycache__/

@@ -10,6 +10,7 @@ The repository keeps a small number of workflow-oriented bundles rather than cre
 | Environment | Purpose |
 |---|---|
 | `docs-and-eda` | Data wrangling, EDA, plotting, documentation, and Quarto notebook rendering (CSV, DataFrames, Arrow, Plots, PlotlyJS, Literate, Documenter, JSON3, QuartoNotebookRunner) |
+| `pisp` | PISP.jl v0.1 documentation and data work with the released package precompiled in the bundle |
 | `optimisation-and-solver-oss` | Optimisation with open-source solvers only — HiGHS, Ipopt, SCS (JuMP, OrdinaryDiffEq) |
 | `optimisation-and-solver-gurobi` | Optimisation with any solver — Gurobi, HiGHS, Ipopt, SCS (JuMP, OrdinaryDiffEq) |
 | `power-systems` | Power-systems simulation and analysis (PowerSystems, PowerSimulations, PowerModels, PowerAnalytics, PRAS, Gurobi, HiGHS) |
@@ -366,4 +367,15 @@ Executable shell scripts must be committed with Git mode `100755`.
 ```sh
 git update-index --chmod=+x path/to/script.sh
 git ls-files --stage path/to/script.sh
+```
+
+### Creating `Manifest.toml`
+
+This example use `--project=./environments/pisp`.
+
+```sh
+JULIA_PKG_PRECOMPILE_AUTO=0 \
+julia --startup-file=no \
+  --project=./environments/pisp \
+  -e 'using Pkg; Pkg.instantiate(; allow_autoprecomp=false); Pkg.update()'
 ```
