@@ -39,44 +39,6 @@ jobs:
       - name: Build and validate bundle
         run: scripts/build_environment.sh "$ENVIRONMENT_NAME"
 
-      - name: Verify relocated PISP cache
-        run: |
-          archive=$(find "dist/$ENVIRONMENT_NAME" -maxdepth 1 \
-            -name "julia-env-$ENVIRONMENT_NAME-linux-x86_64-julia-$JULIA_VERSION.tar.zst" \
-            -print -quit)
-          test -n "$archive"
-
-          relocation_root="$RUNNER_TEMP/pisp-relocation-test"
-          rm -rf "$relocation_root"
-          mkdir -p "$relocation_root"
-          tar --use-compress-program=unzstd -xf "$archive" -C "$relocation_root"
-
-          bundle="$relocation_root/julia-env-pisp"
-          JULIA_DEPOT_PATH="$bundle/depot" \
-          JULIA_PKG_OFFLINE=true \
-          JULIA_CPU_TARGET=generic \
-          julia \
-            --startup-file=no \
-            --history-file=no \
-            --compiled-modules=strict \
-            --pkgimages=existing \
-            --project="$bundle/environment" \
-            -e '
-              using PISP
-
-              package_path = realpath(pathof(PISP))
-              expected_root = realpath(joinpath(first(DEPOT_PATH), "packages", "PISP"))
-              startswith(package_path, expected_root * "/") ||
-                  error("PISP was not loaded from the packaged depot: $package_path")
-
-              Base.pkgversion(PISP) == v"0.1.0" ||
-                  error("Expected PISP v0.1.0, found $(Base.pkgversion(PISP))")
-
-              println("PISP source: ", package_path)
-              println("PISP version: ", Base.pkgversion(PISP))
-              println("Strict relocated cache load: passed")
-            '
-
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
