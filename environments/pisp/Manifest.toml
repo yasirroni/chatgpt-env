@@ -1064,11 +1064,11 @@ weakdeps = ["StatsBase"]
 
 [[deps.PISP]]
 deps = ["Arrow", "CSV", "Cascadia", "DataFrames", "Dates", "Downloads", "Gumbo", "HTTP", "OrderedCollections", "PlotlyJS", "Printf", "Tables", "XLSX"]
-git-tree-sha1 = "e2c143400abc3cd47606e59a7dd9b47aa2fa0ce8"
-repo-rev = "v0.1.1"
+git-tree-sha1 = "33c169bc872e0143b1be7cf784fecb93612787cd"
+repo-rev = "v0.1.2"
 repo-url = "https://github.com/ARPST-UniMelb/PISP.jl"
 uuid = "0cf86302-bd88-49fb-82d1-7e27fc78d6eb"
-version = "0.1.1"
+version = "0.1.2"
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
